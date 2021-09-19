@@ -108,9 +108,7 @@ $(".list-group").on("click", "p", function() {
 
 $(".list-group").on("blur", "textarea", function() {
   // get the textarea's current value/text
-  var text = $(this)
-    .val()
-    .trim();
+  var text = $(this).val();
   
   // get the parent ul's id attribute
   var status = $(this)
@@ -122,6 +120,10 @@ $(".list-group").on("blur", "textarea", function() {
   var index = $(this)
     .closet(".list-group-item")
     .index();
+
+  //update task in array and re-save to localstorage
+  tasks[status][index].text = text;
+  saveTasks();
 
   // recreate p element
   var taskP = $("<p>")
@@ -155,9 +157,7 @@ $(".list-group").on("click", "span", function() {
 // value of due date was changed
 $(".list-group").on("blur", "input[type='text']", function() {
   // get current text
-  var date = $(this)
-    .val()
-    .trim();
+  var date = $(this).val();
 
   // get the parent ul's id attribute
   var status = $(this)
@@ -182,3 +182,15 @@ $(".list-group").on("blur", "input[type='text']", function() {
   // replace input with span element
   $(this).replaceWith(taskSpan);
 });
+
+// remove all tasks
+$("#remove-tasks").on("click", function() {
+  for (var key in tasks) {
+    tasks[key].length = 0;
+    $("#list-" + key).empty();
+  }
+  saveTasks();
+});
+
+// load tasks for the first time
+loadTasks();

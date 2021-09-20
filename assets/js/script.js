@@ -68,13 +68,13 @@ $(".card .list-group").sortable({
   tolerance: "pointer",
   helper: "clone",
   activate: function(event) {
-    console.log("activate", this);
+    console.log("activate", dropover);
   },
   deactivate: function(event) {
-    console.log("deactivate", this);
+    console.log("deactivate", dropover);
   },
   over: function(event) {
-    console.log("over", event.target);
+    console.log("over", dropover-active);
   },
   out: function(event) {
     console.log("out", event.target);
@@ -132,7 +132,7 @@ $("#task-form-modal").on("shown.bs.modal", function() {
 });
 
 // save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
+$("#task-form-modal .btn-save").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
@@ -273,6 +273,12 @@ var createTask = function(taskText, taskDate, taskList) {
 
   $("#list-" + taskList).append(taskLi);
 };
+
+setInterval(function() {
+  $(".card .list-group-item").each(function(index, el) {
+    auditTask(el);
+  });
+}, (1000 * 60) *30);
 
 // remove all tasks
 $("#remove-tasks").on("click", function() {

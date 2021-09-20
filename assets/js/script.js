@@ -44,7 +44,79 @@ var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
+var auditTask = function(taskEl) {
+  var date = $(taskEl).find("span").text().trim();
 
+  console.log(date);
+
+  var time = moment(date, "L").set("hour", 17);
+
+  $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
+
+  if (moment().isAfter(time)) {
+    $(taskEl).addClass("list-group-item-danger");
+  }
+
+  else if (Math.abs(moment().diff(time, "days")) <= 2) {
+    $(taskEl).addClass("list-group-item-warning");
+  }
+};
+
+$(".card .list-group").sortable({
+  connectWith: $(".card .list-group"),
+  scroll: false,
+  tolerance: "pointer",
+  helper: "clone",
+  activate: function(event) {
+    console.log("activate", this);
+  },
+  deactivate: function(event) {
+    console.log("deactivate", this);
+  },
+  over: function(event) {
+    console.log("over", event.target);
+  },
+  out: function(event) {
+    console.log("out", event.target);
+  },
+  update: function(event) {
+    var tempArr = [];
+
+    $(this).children().each(function() {
+      var text = $(this).find("p").text().trim();
+
+      var date = $(this).find("span").text().trim();
+
+      tempArr.push({
+        text: text,
+        date: date
+      });
+    });
+
+    var arrName = $(this).attr("id").replace("list-", "");
+
+    tasks[arrName] = tempArr;
+    saveTasks();
+  },
+  stop: function(event) {
+    $(this).removeClass("dropover");
+  }
+});
+
+$("#trash").droppable({
+  accept: ".card .list-group-item",
+  tolerance: "touch",
+  drop: function(event, ui) {
+    console.log("drop");
+    ui.draggable.remove();
+  },
+  over: function(event, ui) {
+    console.log("over");
+  },
+  out: function(event, ui) {
+    console.log("out");
+  }
+});
 
 
 // modal was triggered
@@ -79,15 +151,6 @@ $("#task-form-modal .btn-primary").click(function() {
 
     saveTasks();
   }
-});
-
-// remove all tasks
-$("#remove-tasks").on("click", function() {
-  for (var key in tasks) {
-    tasks[key].length = 0;
-    $("#list-" + key).empty();
-  }
-  saveTasks();
 });
 
 // load tasks for the first time
@@ -193,91 +256,9 @@ $(".list-group").on("change", "input[type='text']", function() {
   auditTask($(taskSpan).closest(".list-group-item"));
 });
 
-// remove all tasks
-$("#remove-tasks").on("click", function() {
-  for (var key in tasks) {
-    tasks[key].length = 0;
-    $("#list-" + key).empty();
-  }
-  saveTasks();
-});
-
-$(".card .list-group").sortable({
-  connectWith: $(".card .list-group"),
-  scroll: false,
-  tolerance: "pointer",
-  helper: "clone",
-  activate: function(event) {
-    console.log("activate", this);
-  },
-  deactivate: function(event) {
-    console.log("deactivate", this);
-  },
-  over: function(event) {
-    console.log("over", event.target);
-  },
-  out: function(event) {
-    console.log("out", event.target);
-  },
-  update: function(event) {
-    var tempArr = [];
-
-    $(this).children().each(function() {
-      var text = $(this).find("p").text().trim();
-
-      var date = $(this).find("span").text().trim();
-
-      tempArr.push({
-        text: text,
-        date: date
-      });
-    });
-
-    var arrName = $(this).attr("id").replace("list-", "");
-
-    tasks[arrName] = tempArr;
-    saveTasks();
-
-    console.log(tempArr);
-  }
-});
-
-$("#trash").droppable({
-  accept: ".card .list-group-item",
-  tolerance: "touch",
-  drop: function(event, ui) {
-    console.log("drop");
-    ui.draggable.remove();
-  },
-  over: function(event, ui) {
-    console.log("over");
-  },
-  out: function(event, ui) {
-    console.log("out");
-  }
-});
-
 $("#modalDueDate").datepicker({
   minDate: 1
 });
-
-var auditTask = function(taskEl) {
-  var date = $(taskEl).find("span").text().trim();
-
-  console.log(date);
-
-  var time = moment(date, "L").set("hour", 17);
-
-  $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
-
-  if (moment().isAfter(time)) {
-    $(taskEl).addClass("list-group-item-danger");
-  }
-
-  else if (Math.abs(moment().diff(time, "days")) <= 2) {
-    $(taskEl).addClass("list-group-item-warning");
-  }
-};
 
 var createTask = function(taskText, taskDate, taskList) {
   var taskLi = $("<li>").addClass("list-group-item");
@@ -292,6 +273,15 @@ var createTask = function(taskText, taskDate, taskList) {
 
   $("#list-" + taskList).append(taskLi);
 };
+
+// remove all tasks
+$("#remove-tasks").on("click", function() {
+  for (var key in tasks) {
+    tasks[key].length = 0;
+    $("#list-" + key).empty();
+  }
+  saveTasks();
+});
 
 // load tasks for the first time
 loadTasks();
